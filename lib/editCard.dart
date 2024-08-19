@@ -29,7 +29,7 @@ class _EditcardState extends State<Editcard> {
 
   void updateCard(String title, String desc) async{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final newNote = new Note(1,title,desc);
+    final newNote = Note(1,title,desc);
     prefs.setString('note', jsonEncode(newNote)); 
   }
 
@@ -41,12 +41,12 @@ class _EditcardState extends State<Editcard> {
         title: const Text('Home Page'), 
       ),
       body: Container(  
-        margin: const EdgeInsets.only(top:24,bottom: 24, right: 24, left: 24,),
+        margin: const EdgeInsets.only(  top:24,bottom: 24, right: 24, left: 24,),
           child: Center(
             child: Column(
-              children: [
+              children: [ 
                 TextField(
-                  onChanged: (text) {
+                  onChanged: (text) { 
                     updateTitle(text);
                   },
                   style: TextStyle(fontSize: 28),

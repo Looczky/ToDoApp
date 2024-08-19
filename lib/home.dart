@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,23 +12,35 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+  class _HomeState extends State<Home> {
 
-  String? notes = '';    
+    Note? note;    
 
-  void loadData() async{
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    @override
+    void initState(){
+      super.initState();
+      loadData();
+    } 
 
-    setState(() {
-      notes = prefs.getString('note') ?? '';
-    });
-  }
+    void loadData() async{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final _jsonString = prefs.getString('note');
 
-  @override
-  void initState(){
-    loadData();
-    super.initState();
-  }
+      if (_jsonString != null && _jsonString.isNotEmpty){
+        try{
+          final noteMap = jsonDecode(_jsonString) as Map<String, dynamic>;
+          setState(() {
+            note = Note.fromJson(noteMap);
+          }); 
+        } catch (e){
+          print('Error decoding JSON: $e');
+        }
+      } else{
+        setState(() {
+          note = null;
+        });
+      }
+    }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,16 +51,12 @@ class _HomeState extends State<Home> {
           children: [
             const Center(child: Text('My notes:',style: TextStyle(fontSize: 28),)),
             const SizedBox(height: 10,),
+
             Card(
               child: ListTile(
                 leading: TextButton(
                   onPressed: () async{
-                    loadData();
-                    final SharedPreferences prefs = await SharedPreferences.getInstance();
-                    final jsonString = prefs.getString('note') ?? '';
-                    final noteMap = jsonDecode(jsonString) as Map<String, dynamic>;
-                    final note = Note.fromJson(noteMap); 
-                    print(note.desc);
+                    print(note?.desc);
                     },
                   child: const Text('Hello'),
                 ),
