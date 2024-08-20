@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,23 +13,18 @@ class Home extends StatefulWidget {
 
   class _HomeState extends State<Home> {
 
-    Note? note;    
-
-    @override
-    void initState(){
-      super.initState();
-      loadData();
-    } 
+    Note? note;
+    List<Note> notes = List.empty(); 
 
     void loadData() async{
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final _jsonString = prefs.getString('note');
+      final jsonString = prefs.getString('note');
 
-      if (_jsonString != null && _jsonString.isNotEmpty){
+      if (jsonString != null && jsonString.isNotEmpty){
         try{
-          final noteMap = jsonDecode(_jsonString) as Map<String, dynamic>;
+          List<Note> encoded = Note.decode(jsonString);
           setState(() {
-            note = Note.fromJson(noteMap);
+            notes = encoded;
           }); 
         } catch (e){
           print('Error decoding JSON: $e');
@@ -42,6 +36,20 @@ class Home extends StatefulWidget {
       }
     }
 
+    void clearAll() async{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('note', '[]');
+      setState(() {
+        notes = List.empty();
+      });{}
+    }
+
+    @override
+    void initState(){
+      super.initState();
+      loadData();
+    } 
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFCEEAF7),
@@ -51,24 +59,24 @@ class Home extends StatefulWidget {
           children: [
             const Center(child: Text('My notes:',style: TextStyle(fontSize: 28),)),
             const SizedBox(height: 10,),
-
-            Card(
-              child: ListTile(
-                leading: TextButton(
-                  onPressed: () async{
-                    print(note?.desc);
-                    },
-                  child: const Text('Hello'),
+            for (var i = 0; i<notes.length;i++)
+              Card(
+                child: ListTile(
+                  onTap: () => context.go('/editCard/$i'),
+                  leading: TextButton(
+                    onPressed: () async{
+                      },
+                    child: Text(notes[i].title), 
+                  ),
+                  title: Text(notes[i].desc),
                 ),
-                title: const Text('Created:'),
               ),
-            ),
             Card(
               // Removing ListTile and placing ElevatedButton directly
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
-                  onPressed: () => context.go('/editCard'),
+                  onPressed: () => context.go('/editCard/-1 '),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50), // Full width button
                   ),
@@ -79,6 +87,7 @@ class Home extends StatefulWidget {
                 ),
               ),
             ),
+            TextButton(onPressed: clearAll, child: Text('Clear all!')),
           ],
         ),
       ),

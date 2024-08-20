@@ -14,9 +14,10 @@ final GoRouter _router = GoRouter(
       },
       routes: <RouteBase>[
         GoRoute(
-          path: 'editCard',  
+          path: 'editCard/:id',  
           builder: (BuildContext context, GoRouterState state) {
-            return const Editcard();
+            final String id = state.pathParameters['id']!;
+            return Editcard(id: id);
           },
         ),
       ],

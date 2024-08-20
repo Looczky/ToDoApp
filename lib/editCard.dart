@@ -1,39 +1,78 @@
-import 'dart:convert';
-import 'dart:ffi';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:to_do_app/models/Note.dart';
 
 
-class Editcard extends StatefulWidget{
-  const Editcard({super.key});
+  class Editcard extends StatefulWidget{
+    final String id;
+    
+    const Editcard({super.key, required this.id});
 
-  @override
-  State<Editcard> createState() => _EditcardState();
-}
-
-class _EditcardState extends State<Editcard> {
-  String title = '';
-  String desc = '';
-
-  void updateTitle(String newTitle) async{
-    title = newTitle;
-    updateCard(title, desc);
+    @override
+    State<Editcard> createState() => _EditcardState();
   }
 
-  void updateDesc(String newDesc) async{
-    desc = newDesc;
-    updateCard(title, desc);
-  }
+  class _EditcardState extends State<Editcard> {
+    late int id;
+    String title = '';
+    String desc = '';
+    late Note currentNote;
+    late List<Note> notes;
 
-  void updateCard(String title, String desc) async{
+
+    void updateCard(String newTitle, String newDesc) async {
+      setState(() {
+        title = newTitle;
+        desc = newDesc;
+        currentNote = Note(widget.id,newTitle,newDesc);
+      });
+      updateData();
+    } 
+
+
+  void updateData() async{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final newNote = Note(1,title,desc);
-    prefs.setString('note', jsonEncode(newNote)); 
+
+    if (id == -1){
+      notes.add(currentNote);
+      setState(() {
+        id = notes.length - 1; 
+      });
+    }
+    else{
+      notes[id] = currentNote;
+    } 
+    prefs.setString('note', Note.encode(notes));
   }
 
+  void loadData() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final _jsonStringList = prefs.getString('note');
+
+    if (_jsonStringList != null && _jsonStringList. isNotEmpty){
+        try{
+          // final noteMap = jsonDecode(_jsonStringList) as Map<String, dynamic>;
+          setState(() {
+            notes = Note.decode(_jsonStringList);
+          }); 
+        } catch (e){
+          print('Error decoding JSON: $e');
+        }
+      } else{
+        setState(() {
+          notes = [];
+        });
+      }
+    }
+
+
   @override
+  void initState(){
+    super.initState();
+    id = int.parse(widget.id);  
+    loadData();
+  } 
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 97, 185, 219)  ,  
@@ -47,7 +86,7 @@ class _EditcardState extends State<Editcard> {
               children: [ 
                 TextField(
                   onChanged: (text) { 
-                    updateTitle(text);
+                    updateCard(title,text);
                   },
                   style: TextStyle(fontSize: 28),
                   minLines: 1,
@@ -59,7 +98,7 @@ class _EditcardState extends State<Editcard> {
                 SizedBox(height: 10,),  
                 TextField(
                   onChanged: (text) {
-                    updateDesc(text);
+                    updateCard(text,desc);
                   },
                   style: TextStyle(fontSize: 18), 
                   minLines: 12,
