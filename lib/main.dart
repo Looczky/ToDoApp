@@ -21,7 +21,7 @@ final GoRouter _router = GoRouter(
 
             final String? title = extras?['title'] as String?;
             final String? desc = extras?['desc'] as String?;
-            
+
             return Editcard(id: id, title:title, desc:desc);
           },
         ),

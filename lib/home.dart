@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:to_do_app/models/Note.dart';
+import 'package:logger/logger.dart';
 
 // TODO: note and notes confusing a bit
+
+final Logger _logger = Logger();
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,55 +15,56 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-  class _HomeState extends State<Home> {
+class _HomeState extends State<Home> {
 
-    Note? note;
-    List<Note> notes = List.empty(); 
+  Note? note;
+  List<Note> notes = List.empty(); 
 
-    void loadData() async{
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final jsonString = prefs.getString('note');
+  void loadData() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('note');
 
-      if (jsonString != null && jsonString.isNotEmpty){
-        try{
-          List<Note> encoded = Note.decode(jsonString);
-          setState(() {
-            notes = encoded;
-          }); 
-        } catch (e){
-          print('Error decoding JSON: $e');
-        }
-      } else{
+    if (jsonString != null && jsonString.isNotEmpty){
+      try{
+        List<Note> decoded = Note.decode(jsonString);
         setState(() {
-          note = null;
-        });
+          notes = decoded;
+        }); 
+      } catch (e){
+        _logger.e('Error decoding JSON: $e');
       }
-    }
-
-    void clearAll() async{
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('note', '[]');
+    } else{
       setState(() {
-        notes = List.empty();
-      });{}
+        note = null;
+      });
     }
+  }
 
-    void deleteNote(index) async{
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final notesUpdated = notes..removeAt(index);
-      final notesStr = Note.encode(notesUpdated);
-      await prefs.setString('note', notesStr);
-      setState(() {
-        notes = notesUpdated;
-      });{}
-    }
+  void clearAll() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('note', '[]');
+    setState(() {
+      notes = List.empty();
+    });{}
+  }
 
-    @override
-    void initState(){
-      super.initState();
-      loadData();
-    } 
+  void deleteNote(index) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final notesUpdated = notes..removeAt(index);
+    final notesStr = Note.encode(notesUpdated);
+    await prefs.setString('note', notesStr);
+    setState(() {
+      notes = notesUpdated;
+    });{}
+  }
 
+  @override
+  void initState(){
+    super.initState();
+    loadData();
+  } 
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFCEEAF7),
@@ -86,7 +90,7 @@ class Home extends StatefulWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       ), 
-                    trailing: IconButton(onPressed: ()=>{deleteNote(id)}, icon: Icon(Icons.delete)),
+                    trailing: IconButton(onPressed: ()=>{deleteNote(id)}, icon: const Icon(Icons.delete)),
                   ),
                 ),
               Card(
