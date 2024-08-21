@@ -59,34 +59,30 @@ class Home extends StatefulWidget {
           children: [
             const Center(child: Text('My notes:',style: TextStyle(fontSize: 28),)),
             const SizedBox(height: 10,),
-            for (var i = 0; i<notes.length;i++)
+            for (var id = 0; id<notes.length;id++)
               Card(
                 child: ListTile(
-                  onTap: () => context.go('/editCard/$i'),
+                  onTap: () => context.go(
+                    '/editCard/$id',
+                    extra: {
+                      'title': notes[id].title,
+                      'desc': notes[id].desc,
+                    },
+                  ),
                   leading: TextButton(
                     onPressed: () async{
                       },
-                    child: Text(notes[i].title), 
+                    child: Text(notes[id].title), 
                   ),
-                  title: Text(notes[i].desc),
+                  title: Text(notes[id].desc),
                 ),
               ),
-            Card(
-              // Removing ListTile and placing ElevatedButton directly
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: () => context.go('/editCard/-1 '),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50), // Full width button
-                  ),
-                  child: const Text(
-                    'Add new!',
-                    textAlign: TextAlign.center,
-                  ),
+              Card(
+                child: ListTile(
+                  onTap: () => context.go('/editCard/-1'),
+                  title: Center(child: Text('Add new note!')),
                 ),
               ),
-            ),
             TextButton(onPressed: clearAll, child: Text('Clear all!')),
           ],
         ),
