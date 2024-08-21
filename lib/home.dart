@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:to_do_app/models/Note.dart';
 
+// TODO: note and notes confusing a bit
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -44,6 +45,16 @@ class Home extends StatefulWidget {
       });{}
     }
 
+    void deleteNote(index) async{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final notesUpdated = notes..removeAt(index);
+      final notesStr = Note.encode(notesUpdated);
+      await prefs.setString('note', notesStr);
+      setState(() {
+        notes = notesUpdated;
+      });{}
+    }
+
     @override
     void initState(){
       super.initState();
@@ -60,30 +71,31 @@ class Home extends StatefulWidget {
             const Center(child: Text('My notes:',style: TextStyle(fontSize: 28),)),
             const SizedBox(height: 10,),
             for (var id = 0; id<notes.length;id++)
-              Card(
-                child: ListTile(
-                  onTap: () => context.go(
-                    '/editCard/$id',
-                    extra: {
-                      'title': notes[id].title,
-                      'desc': notes[id].desc,
-                    },
-                  ),
-                  leading: TextButton(
-                    onPressed: () async{
+                Card(
+                  child: ListTile(
+                    onTap: () => context.go(
+                      '/editCard/$id',
+                      extra: {
+                        'title': notes[id].title,
+                        'desc': notes[id].desc, 
                       },
-                    child: Text(notes[id].title), 
+                    ),
+                    title: Text(notes[id].title),
+                    subtitle: Text(
+                      notes[id].desc,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      ), 
+                    trailing: IconButton(onPressed: ()=>{deleteNote(id)}, icon: Icon(Icons.delete)),
                   ),
-                  title: Text(notes[id].desc),
                 ),
-              ),
               Card(
                 child: ListTile(
                   onTap: () => context.go('/editCard/-1'),
-                  title: Center(child: Text('Add new note!')),
+                  title: const Center(child: Text('Add new note!')),
                 ),
               ),
-            TextButton(onPressed: clearAll, child: Text('Clear all!')),
+            TextButton(onPressed: clearAll, child: const Text('Clear all!')),
           ],
         ),
       ),

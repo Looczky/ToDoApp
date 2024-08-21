@@ -6,7 +6,7 @@ import 'package:to_do_app/models/Note.dart';
   class Editcard extends StatefulWidget{
     final String id;
     final String? title,desc;
-    
+
     const Editcard({super.key, required this.id, this.title,this.desc});
 
     @override
@@ -71,6 +71,12 @@ import 'package:to_do_app/models/Note.dart';
   void initState(){
     super.initState();
     id = int.parse(widget.id);
+    if (widget.title != null) {
+      title = widget.title!;
+    }
+    if (widget.desc != null) {
+      desc = widget.desc!;
+    }
     loadData();
   } 
 
@@ -108,7 +114,7 @@ import 'package:to_do_app/models/Note.dart';
                       minLines: 12,
                       maxLines: 100,
                       decoration: InputDecoration(
-                        hintText: 'Description  '
+                        hintText: 'Description'
                         ),
                     ),
                   ],
@@ -118,8 +124,6 @@ import 'package:to_do_app/models/Note.dart';
                     children: [
                       (TextFormField(
                         initialValue: widget.title,
-                        // controller: TextEditingController()
-                        //   ..text = widget.title!,
                         onChanged: (newTitle) { 
                           updateCard(newTitle,desc);
                         },
@@ -138,7 +142,7 @@ import 'package:to_do_app/models/Note.dart';
                           updateCard(title,newDesc);
                         },
                         decoration: InputDecoration(
-                          hintText: 'Description  '
+                          hintText: 'Description'
                           ),
                         style: TextStyle(fontSize: 18), 
                         minLines: 12,
