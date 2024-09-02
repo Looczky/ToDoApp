@@ -40,13 +40,13 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void clearAll() async{
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('note', '[]');
-    setState(() {
-      notes = List.empty();
-    });{}
-  }
+  // void clearAll() async{
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   await prefs.setString('note', '[]');
+  //   setState(() {
+  //     notes = List.empty();
+  //   });{}
+  // }
 
   void deleteNote(index) async{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
     await prefs.setString('note', notesStr);
     setState(() {
       notes = notesUpdated;
-    });{}
+    });{} 
   }
 
   @override
@@ -99,7 +99,7 @@ class _HomeState extends State<Home> {
                   title: const Center(child: Text('Add new note!')),
                 ),
               ),
-            TextButton(onPressed: clearAll, child: const Text('Clear all!')),
+            // TextButton(onPressed: clearAll, child: const Text('Clear all!')),
           ],
         ),
       ),

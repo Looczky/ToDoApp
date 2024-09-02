@@ -21,6 +21,10 @@ class _EditcardState extends State<Editcard> {
   String desc = '';
   late Note currentNote;
   late List<Note> notes;
+  final Color titleColor = Color.fromARGB(255, 133, 205, 223);
+  final Color descColor = Color.fromARGB(255, 133, 205, 223);
+  late ScrollController _scrollController;
+  late FocusNode _descFocusNode;
 
 
   void updateCard(String newTitle, String newDesc) async {
@@ -80,83 +84,107 @@ void initState(){
     desc = widget.desc!;
   }
   loadData();
+  _scrollController = ScrollController();
+  _descFocusNode = FocusNode();
+
+  void _scrollToFocusedLine() {
+    Future.delayed(Duration(milliseconds: 300), () {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  } 
+
+  _descFocusNode.addListener(() {
+      if (_descFocusNode.hasFocus) {
+        // Scroll to the focused line in the TextFormField
+        _scrollToFocusedLine();
+      }
+    });
 } 
 
+
+
 @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: const Color.fromARGB(255, 97, 185, 219)  ,  
-    appBar: AppBar(
-      title: const Text('Home Page'), 
-    ),
-    body: Container(  
-      margin: const EdgeInsets.only(  top:24,bottom: 24, right: 24, left: 24,),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 97, 185, 219),
+      appBar: AppBar(
+        title: const Text('Home Page'),
+      ),
+      body: Container(
+        margin: const EdgeInsets.only(
+          top: 24,
+          bottom: 24,
+          right: 24,
+          left: 24,
+        ),
         child: Center(
-          child: Builder(builder: (context) {
-            if (int.parse(widget.id) == -1){
+          child: Builder(
+            builder: (context) {
               return Column(
                 children: [
-                  TextField(
-                    onChanged: (newTitle) { 
-                      updateCard(newTitle,desc);
-                    },
-                    style: const TextStyle(fontSize: 28),
-                    minLines: 1,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Title'
+                  Container(
+                    decoration: BoxDecoration(
+                      color: titleColor, // replace with titleColor
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: TextFormField(
+                      initialValue: widget.id == -1 ? null : widget.title,
+                      onChanged: (newTitle) {
+                        updateCard(newTitle, desc);
+                      },
+                      minLines: 1,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: 'Title',
+                        contentPadding: EdgeInsets.symmetric( 
+                            horizontal: 16.0, vertical: 16),
+                      ),
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Expanded( 
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: descColor, // replace with descColor
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        child: TextFormField(
+                          focusNode: _descFocusNode,
+                          initialValue:
+                              widget.id == -1 ? null : widget.desc,
+                          onChanged: (newDesc) {
+                            updateCard(title, newDesc);
+                          },
+                          style: const TextStyle(fontSize: 18),
+                          minLines: 12,
+                          maxLines: null,
+                          decoration: const InputDecoration(
+                            hintText: 'Description',
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 16),
+                          ),
+                          keyboardType: TextInputType.multiline,
+                        ),
                       ),
                     ),
-                  const SizedBox(height: 10,),
-                  TextField(
-                    onChanged: (newDesc) {
-                      updateCard(title,newDesc);  
-                    },
-                    style: const TextStyle(fontSize: 18), 
-                    minLines: 12,
-                    maxLines: 100,
-                    decoration: const InputDecoration(
-                      hintText: 'Description'
-                      ),
                   ),
                 ],
               );
-            } else{
-                return Column(
-                  children: [
-                    (TextFormField(
-                      initialValue: widget.title,
-                      onChanged: (newTitle) { 
-                        updateCard(newTitle,desc);
-                      },
-                      decoration: const InputDecoration(
-                        labelText: 'Title'
-                        ),
-                      style: const TextStyle(fontSize: 28),
-                      minLines: 1,
-                      maxLines: 2,
-                      )
-                    ),
-                    const SizedBox(height: 10,),
-                    TextFormField(
-                      initialValue: widget.desc,
-                      onChanged: (newDesc) {
-                        updateCard(title,newDesc);
-                      },
-                      decoration: const InputDecoration(
-                        hintText: 'Description'
-                        ),
-                      style: const TextStyle(fontSize: 18), 
-                      minLines: 12,
-                      maxLines: 100,
-                    ),
-                  ],
-                );
-              }  
             },
           ),
+        ),
       ),
-    )
+      resizeToAvoidBottomInset: true,
     );
-}
+  }
 }
